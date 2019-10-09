@@ -1,0 +1,116 @@
+#!/bin/bash
+
+n0PREV_TOTAL=0
+n0PREV_IDLE=0
+n1PREV_TOTAL=0
+n1PREV_IDLE=0
+n2PREV_TOTAL=0
+n2PREV_IDLE=0
+n3PREV_TOTAL=0
+n3PREV_IDLE=0
+
+# by Paul Colby (http://colby.id.au), no rights reserved ;)
+# https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
+cpu0()
+{
+  # Get the total CPU statistics, discarding the 'cpu ' prefix.
+  CPU=(`sed -n 's/^cpu0\s//p' /proc/stat`)
+  IDLE=${CPU[3]} # Just the idle CPU time.
+
+  # Calculate the total CPU time.
+  TOTAL=0
+  for VALUE in "${CPU[@]}"; do
+    let "TOTAL=$TOTAL+$VALUE"
+  done
+
+  # Calculate the CPU usage since we last checked.
+  let "DIFF_IDLE=$IDLE-$n0PREV_IDLE"
+  let "DIFF_TOTAL=$TOTAL-$n0PREV_TOTAL"
+  let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
+  echo -en "\rCPU: $DIFF_USAGE%  \b\b"
+
+  # Remember the total and idle CPU times for the next check.
+  n0PREV_TOTAL="$TOTAL"
+  n0PREV_IDLE="$IDLE"
+}
+
+cpu1()
+{
+  # Get the total CPU statistics, discarding the 'cpu ' prefix.
+  CPU=(`sed -n 's/^cpu1\s//p' /proc/stat`)
+  IDLE=${CPU[3]} # Just the idle CPU time.
+
+  # Calculate the total CPU time.
+  TOTAL=0
+  for VALUE in "${CPU[@]}"; do
+    let "TOTAL=$TOTAL+$VALUE"
+  done
+
+  # Calculate the CPU usage since we last checked.
+  let "DIFF_IDLE=$IDLE-$n1PREV_IDLE"
+  let "DIFF_TOTAL=$TOTAL-$n1PREV_TOTAL"
+  let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
+  #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
+  printf " CPU1: $DIFF_USAGE%% "
+
+  # Remember the total and idle CPU times for the next check.
+  n1PREV_TOTAL="$TOTAL"
+  n1PREV_IDLE="$IDLE"
+}
+
+cpu2()
+{
+  # Get the total CPU statistics, discarding the 'cpu ' prefix.
+  CPU=(`sed -n 's/^cpu2\s//p' /proc/stat`)
+  IDLE=${CPU[3]} # Just the idle CPU time.
+
+  # Calculate the total CPU time.
+  TOTAL=0
+  for VALUE in "${CPU[@]}"; do
+    let "TOTAL=$TOTAL+$VALUE"
+  done
+
+  # Calculate the CPU usage since we last checked.
+  let "DIFF_IDLE=$IDLE-$n2PREV_IDLE"
+  let "DIFF_TOTAL=$TOTAL-$n2PREV_TOTAL"
+  let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
+  #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
+  printf "CPU2: $DIFF_USAGE%% "
+
+  # Remember the total and idle CPU times for the next check.
+  n2PREV_TOTAL="$TOTAL"
+  n2PREV_IDLE="$IDLE"
+}
+
+cpu3()
+{
+  # Get the total CPU statistics, discarding the 'cpu ' prefix.
+  CPU=(`sed -n 's/^cpu3\s//p' /proc/stat`)
+  IDLE=${CPU[3]} # Just the idle CPU time.
+
+  # Calculate the total CPU time.
+  TOTAL=0
+  for VALUE in "${CPU[@]}"; do
+    let "TOTAL=$TOTAL+$VALUE"
+  done
+
+  # Calculate the CPU usage since we last checked.
+  let "DIFF_IDLE=$IDLE-$n3PREV_IDLE"
+  let "DIFF_TOTAL=$TOTAL-$n3PREV_TOTAL"
+  let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
+  #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
+  printf "CPU3: $DIFF_USAGE%% "
+
+  # Remember the total and idle CPU times for the next check.
+  n3PREV_TOTAL="$TOTAL"
+  n3PREV_IDLE="$IDLE"
+}
+
+while true; do
+  cpu0
+  cpu1
+  cpu2
+  cpu3
+  # Wait before checking again.
+  sleep 1
+done
