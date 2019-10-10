@@ -27,7 +27,7 @@ cpu0()
   let "DIFF_IDLE=$IDLE-$n0PREV_IDLE"
   let "DIFF_TOTAL=$TOTAL-$n0PREV_TOTAL"
   let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
-  echo -en "\rCPU: $DIFF_USAGE%  \b\b"
+  echo -en "\rCPU1 $DIFF_USAGE%  \b\b"
 
   # Remember the total and idle CPU times for the next check.
   n0PREV_TOTAL="$TOTAL"
@@ -51,7 +51,7 @@ cpu1()
   let "DIFF_TOTAL=$TOTAL-$n1PREV_TOTAL"
   let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
   #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
-  printf " CPU1: $DIFF_USAGE%% "
+  printf "   CPU2 $DIFF_USAGE%% "
 
   # Remember the total and idle CPU times for the next check.
   n1PREV_TOTAL="$TOTAL"
@@ -75,7 +75,7 @@ cpu2()
   let "DIFF_TOTAL=$TOTAL-$n2PREV_TOTAL"
   let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
   #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
-  printf "CPU2: $DIFF_USAGE%% "
+  printf "  CPU3 $DIFF_USAGE%% "
 
   # Remember the total and idle CPU times for the next check.
   n2PREV_TOTAL="$TOTAL"
@@ -99,11 +99,26 @@ cpu3()
   let "DIFF_TOTAL=$TOTAL-$n3PREV_TOTAL"
   let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
   #echo -en "\rCPU: $DIFF_USAGE%  \b\b"
-  printf "CPU3: $DIFF_USAGE%% "
+  printf "  CPU4 $DIFF_USAGE%%"
 
   # Remember the total and idle CPU times for the next check.
   n3PREV_TOTAL="$TOTAL"
   n3PREV_IDLE="$IDLE"
+}
+
+ramusage()
+{
+	echo
+	ram_usage="$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{print 100-100*a/t}' /proc/meminfo)"
+	ram_usage="$(python3 -c "print(round($ram_usage))")"
+	# printf "RAM $ram_usage%%  "
+}
+
+hddusage()
+{
+	#printf "HDD $(df | awk '/ \/$/{print $5}')%"
+	printf "\033[K"   # delete till end of line
+	echo -ne "\r            RAM $ram_usage%  HDD $(df | awk '/ \/$/{print $5}')"
 }
 
 while true; do
@@ -111,6 +126,10 @@ while true; do
   cpu1
   cpu2
   cpu3
+  ramusage
+  hddusage
   # Wait before checking again.
   sleep 1
+  printf "\033[1A"  # move cursor one line up
+  printf "\033[K"   # delete till end of line
 done
